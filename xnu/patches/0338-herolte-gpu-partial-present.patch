@@ -1,0 +1,18 @@
+diff --git a/iokit/Kernel/arm/SweetFramebuffer.cpp b/iokit/Kernel/arm/SweetFramebuffer.cpp
+--- a/iokit/Kernel/arm/SweetFramebuffer.cpp
++++ b/iokit/Kernel/arm/SweetFramebuffer.cpp
+@@ -720,8 +720,12 @@
+ #if defined(ARM64_BOARD_CONFIG_HEROLTE)
+-		if (src != 0 && bpe == 4 && fGpu && dx == 0 && dy == 0 &&
+-		    w == (int32_t)fLogicalW && h == (int32_t)fLogicalH && gpuPresent(s, sx, sy, w, h)) {
++		/* iOS usually reports only a dirty sub-rect. If the backing
++		 * surface is the full logical screen, let the Mali redraw the
++		 * whole surface instead of falling back to the CPU copy. */
++		if (src != 0 && bpe == 4 && fGpu &&
++		    s->width == (uint32_t)fLogicalW && s->height == (uint32_t)fLogicalH &&
++		    gpuPresent(s, 0, 0, fLogicalW, fLogicalH)) {
+ 			copied += (uint64_t)fWidth * fHeight * 4;
+ 			s->release();
+ 			continue;
+ 		}
+ #endif
